@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { DB } from '../firebaseApp';
+import { DB, storage } from '../firebaseApp';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { ref, deleteObject } from "firebase/storage"
 
 export default function Tweet({ tweetObj, isOwner }) {
   const [editing, setEditing] = useState(false);
@@ -13,6 +14,7 @@ export default function Tweet({ tweetObj, isOwner }) {
 
     if (ok) {
       await deleteDoc(TweetTextRef);
+      await deleteObject(ref(storage, tweetObj.downloadFile));
     }
   }
 
@@ -43,6 +45,7 @@ export default function Tweet({ tweetObj, isOwner }) {
         ) : (
           <>
             <h4>{tweetObj.text}</h4>
+            { tweetObj.downloadFile && <img src={tweetObj.downloadFile} width="50px" height="50px" alt="img" /> }
             { isOwner &&
               <>
                 <button onClick={onDeleteClick}>Delete Tweet</button>

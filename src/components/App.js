@@ -25,7 +25,7 @@ export default function App() {
     <>
       {init ? <Router isLogin={isLogin} userObj={userObj} /> : "Initializing..."}
       <footer>
-        &copy; Nwitter {new Date().getFullYear()}
+        &copy; React-Twitter {new Date().getFullYear()}
       </footer>
     </>
   )
