@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Router from './Main'
 
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { authService } from '../firebaseApp';
 
 export default function App() {
   const [init, setInit] = useState(false);
@@ -21,9 +22,16 @@ export default function App() {
     })
   }, []);
 
+  const refreshUser = () => {
+    const user = authService.currentUser;
+    setUserObj({
+      ...user
+    });
+  }
+
   return (
     <>
-      {init ? <Router isLogin={isLogin} userObj={userObj} /> : "Initializing..."}
+      {init ? <Router isLogin={isLogin} userObj={userObj} refreshUser={refreshUser} /> : "Initializing..."}
       <footer>
         &copy; React-Twitter {new Date().getFullYear()}
       </footer>
