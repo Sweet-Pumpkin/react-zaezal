@@ -2,32 +2,36 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 
 import { authService, DB } from '../firebaseApp'
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
+
+import Tweet from '../components/Tweet';
 
 export default function Profile({ userObj, refreshUser }) {
   const navigate = useNavigate();
   
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
+  const [myTweets, setMyTweets] = useState([]);
 
   const onLogOutClick = () => {
     authService.signOut();
     navigate("/");
   }
 
-  const getMyTweets = async () => {
-    const tweets = await query(
+  useEffect(() => {
+    const myTweets = query(
       collection(DB, "tweets"), 
       where("createrId", "==", userObj.uid),
       orderBy("createdAt")
     );
-    const querySnapshot = await getDocs(tweets);
-    console.log(querySnapshot.docs.map(doc => doc.data()));
-  }
-
-  useEffect(() => {
-    getMyTweets();
-  }, []);
+    onSnapshot(myTweets, (snapshot) => {
+      const myTweetArr = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      setMyTweets(myTweetArr);
+    })
+  }, [userObj]);
 
   const onChange = e => {
     const { target: { value } } = e;
@@ -49,6 +53,11 @@ export default function Profile({ userObj, refreshUser }) {
         <input type="submit" value="Update Profile" />
       </form>
       <button onClick={onLogOutClick}>Log Out</button>
+      {
+        myTweets.map(tweet => (
+          <Tweet key={tweet.id} tweetObj={tweet} isOwner={tweet.createrId === userObj.uid} />
+        ))
+      }
     </>
   )
 }
